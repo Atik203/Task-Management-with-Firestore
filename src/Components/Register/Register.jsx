@@ -4,10 +4,8 @@ import "react-toastify/dist/ReactToastify.css";
 import { useContext, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet";
-
 import { useForm } from "react-hook-form";
 import { AuthContext } from "../../Providers/AuthProvider";
-import useAxiosSecure from "./../../Hooks/useAxiosSecure";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -17,7 +15,7 @@ const Register = () => {
     handleSubmit,
     formState: { errors },
   } = useForm();
-  const axiosSecure = useAxiosSecure();
+
   const { createUser } = useContext(AuthContext);
   const [RegError, setRegError] = useState("");
   const [showPass, setshowPass] = useState(false);
@@ -78,25 +76,22 @@ const Register = () => {
       .then((useCredential) => {
         const user = useCredential.user;
 
-        const userInfo = { name, email, photo };
-        axiosSecure.post("/users", userInfo).then((res) => {
-          toast.success("Registration Completed Successfully", {
-            position: "top-right",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-          });
-          navigate(location?.state ? location.state : "/");
-          return updateProfile(user, {
-            displayName: name,
-            photoURL: photo,
-          });
-        });
+        const userInfo = { name, email };
 
+        toast.success("Registration Completed Successfully", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+        navigate(location?.state ? location.state : "/");
+        return updateProfile(user, {
+          displayName: name,
+        });
         // setTimeout(() => {
         //   window.location.reload();
         // }, 1000);
@@ -122,19 +117,6 @@ const Register = () => {
                 className="input input-bordered w-full"
                 name="name"
                 {...register("name")}
-                required
-              />
-            </div>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Photo</span>
-              </label>
-              <input
-                type="text"
-                placeholder="Photo URL"
-                className="input input-bordered w-full"
-                name="photo"
-                {...register("photo")}
                 required
               />
             </div>

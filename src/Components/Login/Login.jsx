@@ -4,11 +4,9 @@ import { useContext, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-
 import { Helmet } from "react-helmet";
 import { AuthContext } from "../../Providers/AuthProvider";
 import auth from "../../Firebase/firebase.config";
-import useAxiosSecure from "../../Hooks/useAxiosSecure";
 
 const Login = () => {
   const {
@@ -17,10 +15,10 @@ const Login = () => {
     formState: { errors },
   } = useForm();
 
-  const axiosSecure = useAxiosSecure();
   const [RegError, setRegError] = useState("");
   const [showPass, setshowPass] = useState(false);
-  const { signIn } = useContext(AuthContext);
+  const [resetEmail, setResetEmail] = useState("");
+  const { signIn, PassForget } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -33,18 +31,17 @@ const Login = () => {
           email: res.user?.email,
           photo: res.user?.photoURL,
         };
-        axiosSecure.post("/users", userInfo).then((res) => {
-          navigate(location?.state ? location.state : "/");
-          toast.success("Login Successfully", {
-            position: "top-right",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-          });
+
+        navigate(location?.state ? location.state : "/");
+        toast.success("Login Successfully", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
         });
       })
       .catch((error) => setRegError(error.message));
@@ -90,6 +87,27 @@ const Login = () => {
           theme: "light",
         });
         setRegError(error.message);
+      });
+  };
+
+  const handlePassForget = () => {
+    // Validate the email (you may want to add more validation)
+    if (!resetEmail) {
+      // Handle empty email case
+      toast.error("Please enter your email", {
+        // ...toast configuration
+      });
+      return;
+    }
+
+    // Call PassForget to send the reset password link
+    PassForget(resetEmail)
+      .then(() => {
+        toast.success("Password reset link sent successfully", {});
+        document.getElementById("my_modal_5").close();
+      })
+      .catch((error) => {
+        toast.error("Failed to send reset password link", {});
       });
   };
 
@@ -172,11 +190,51 @@ const Login = () => {
                 )}
               </span>
               <label className="label">
-                <a href="#" className="label-text-alt link link-hover">
+                <button
+                  onClick={() => {
+                    setResetEmail(""); // Reset the email state
+                    document.getElementById("my_modal_5").showModal();
+                  }}
+                  className="label-text-alt hover:text-red-500 link link-hover"
+                >
                   Forgot password?
-                </a>
+                </button>
               </label>
             </div>
+            <dialog
+              id="my_modal_5"
+              className="modal modal-bottom sm:modal-middle"
+            >
+              <div className="modal-box">
+                <h3 className="font-bold text-lg my-4">Enter Your Email:</h3>
+                <input
+                  type="text"
+                  placeholder="email"
+                  className="input input-bordered w-full"
+                  name="resetEmail"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  required
+                />
+
+                <div className="flex items-center justify-around gap-5">
+                  <div className="modal-action">
+                    <button
+                      onClick={handlePassForget}
+                      className="btn btn-outline bg-red-500 text-white"
+                    >
+                      Reset Password
+                    </button>
+                  </div>
+                  <div className="modal-action">
+                    <form method="dialog">
+                      {/* if there is a button in form, it will close the modal */}
+                      <button className="btn btn-outline">Close</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </dialog>
             <div className="form-control mt-6">
               <input
                 type="submit"

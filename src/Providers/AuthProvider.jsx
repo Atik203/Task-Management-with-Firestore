@@ -7,6 +7,7 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut,
+  sendPasswordResetEmail,
 } from "firebase/auth";
 import auth from "../Firebase/firebase.config";
 
@@ -35,6 +36,11 @@ const AuthProvider = ({ children }) => {
     return credential;
   };
 
+  const PassForget = (email) => {
+    setLoading(true);
+    return sendPasswordResetEmail(auth, email);
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -43,7 +49,7 @@ const AuthProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
-  const AuthInfo = { user, createUser, logout, signIn, loading };
+  const AuthInfo = { user, createUser, logout, signIn, loading, PassForget };
 
   return (
     <AuthContext.Provider value={AuthInfo}>{children}</AuthContext.Provider>
